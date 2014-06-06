@@ -1,12 +1,31 @@
 package main
 
-import "fmt"
-import "github.com/kdgregory/s34go"
+import "log"
+// import "github.com/kdgregory/s34go"
 
 func main() {
-    service,err := s34go.NewS3Service("http://s3.amazon.com", "ksdflkjsdldsflkdfdlf", "lk09r32r09lskdfjkf")
-	fmt.Println("service = ", service, ", err = ", err)
+    config, action, args := ParseCommandLine();
 
-    bucket,err := service.GetBucket("example")
-	fmt.Println("bucket = ", bucket, ", err = ", err)
+    log.Println("config = ", config)
+
+    switch action {
+        case ACTION_LIST.Name : listBucket(args[0]) 
+        case ACTION_GET.Name  : getObject(args[0], args[1]) 
+        case ACTION_PUT.Name  : putObject(args[0], args[1]) 
+    }
+}
+
+
+func listBucket(bucketName string) {
+    log.Println("listBucket(" + bucketName + ")")
+}
+
+
+func getObject(src string, dst string) {
+    log.Println("getObject(" + src + " " + dst + ")")
+}
+
+
+func putObject(src string, dst string) {
+    log.Println("putObject(" + src + " " + dst + ")")
 }
