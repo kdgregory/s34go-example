@@ -9,7 +9,7 @@ import "github.com/kdgregory/gocommons"
 var DEFAULT_CONFIG_FILE = gocommons.PrependHomeDir(".s34go.ini")
 
 type Config struct {
-    PublicKey string
+    AccessKey string
     SecretKey string
 }
 
@@ -37,6 +37,6 @@ func ReadConfigFile(configPath string) (Config, error) {
 // passed configuration
 func (config *Config) Merge(updates Config) {
 
-    config.PublicKey = gocommons.DefaultIfBlank(updates.PublicKey, config.PublicKey)
+    config.AccessKey = gocommons.DefaultIfBlank(updates.AccessKey, config.AccessKey)
     config.SecretKey = gocommons.DefaultIfBlank(updates.SecretKey, config.SecretKey)
 }

@@ -10,12 +10,21 @@ import "strings"
 type Action struct {
     Name string
     NumArgs int
+    UsageDesc string
+    UsageFlags string
+    UsageArgs string
 }
 
-var ACTION_LIST = Action{ "list", 1}
-var ACTION_GET = Action{ "get", 2 }
-var ACTION_PUT = Action{ "put", 2 }
-var VALID_ACTIONS = [...]Action{ ACTION_LIST, ACTION_GET, ACTION_PUT }
+var ACTION_LIST = "list"
+var ACTION_GET = "get"
+var ACTION_PUT = "put"
+
+var VALID_ACTIONS = [...]Action{
+    Action{ ACTION_LIST, 0, "lists all buckets",             "[-config FILE] [-secret KEY] [-public KEY]", "" },
+    Action{ ACTION_LIST, 1, "lists all objects in bucket",   "[-config FILE] [-secret KEY] [-public KEY]", "BUCKET" },
+    Action{ ACTION_GET,  2, "retrieves objects",             "[-config FILE] [-secret KEY] [-public KEY]", "SRC DEST" },
+    Action{ ACTION_PUT,  2, "stores objects",                "[-config FILE] [-secret KEY] [-public KEY]", "SRC DEST" },
+}
 
 
 func ParseCommandLine() (config Config, action string, args []string) {
@@ -25,7 +34,7 @@ func ParseCommandLine() (config Config, action string, args []string) {
     var overrides Config
 
     flag.StringVar(&configPath,            "config", DEFAULT_CONFIG_FILE, "configuration file for S3 connection")
-    flag.StringVar(&(overrides.PublicKey), "public", "", "public key for S3 connection; overrides value in .s340go.ini")
+    flag.StringVar(&(overrides.AccessKey), "public", "", "public key for S3 connection; overrides value in .s340go.ini")
     flag.StringVar(&(overrides.SecretKey), "secret", "", "secret key for S3 connection; overrides value in .s340go.ini")
     flag.Parse()
 
@@ -66,7 +75,12 @@ func showUsageAndExit(message string) {
     if (len(message) > 0) {
         fmt.Fprintln(os.Stderr, message)
     }
-    fmt.Fprintln(os.Stderr, "usage: s3tool [-config FILE] [-secret KEY] [-public KEY] (list | get | put) SRC [DEST]")
+    fmt.Fprintln(os.Stderr, "usage:")
+    for _, action := range VALID_ACTIONS {
+        fmt.Fprintln(os.Stderr, "    s3tool", action.UsageFlags, action.Name, action.UsageArgs)
+        fmt.Fprintln(os.Stderr, "        ", action.UsageDesc)
+    }
+    fmt.Fprintln(os.Stderr, "where:")
     flag.PrintDefaults()
     os.Exit(1)
 }
