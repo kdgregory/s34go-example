@@ -43,10 +43,27 @@ func ParseCommandLine() (config Config, action string, args []string) {
         log.Fatal("unable to process config file:", err) 
     }
     config.Merge(overrides)
+    validateConfig(config)
 
     action = validateAction()
     args = flag.Args()[1:]
     return 
+}
+
+
+func validateConfig(config Config) {
+    errors := make([]string, 0)
+    if len(config.AccessKey) == 0 {
+        errors = append(errors, "missing AWS access key")
+    }
+    if len(config.SecretKey) == 0 {
+        errors = append(errors, "missing AWS secret key")
+    }
+
+    if len(errors) > 0 {
+        message := "incomplete configuration data: " + strings.Join(errors, ", ")
+        showUsageAndExit(message)
+    }
 }
 
 
@@ -56,18 +73,26 @@ func validateAction() string {
     }
 
     action := strings.ToLower(strings.TrimSpace(flag.Args()[0]))
+    actionFound := false
+    argCountCorrect := false
     for _,allowed := range VALID_ACTIONS {
         if allowed.Name == action {
+            actionFound = true
             if allowed.NumArgs == flag.NArg() - 1 {
-                return action
-            } else {
-                showUsageAndExit("incorrect number of arguments for action " + action)
+                argCountCorrect = true
             }
         }
     }
 
-    showUsageAndExit("invalid action: " + flag.Args()[0])
-    return ""   // never called
+    if !actionFound {
+        showUsageAndExit("invalid action: " + flag.Args()[0])
+    }
+
+    if !argCountCorrect {
+        showUsageAndExit("incorrect number of arguments for action: " + action)
+    }
+
+    return action
 }
 
 
